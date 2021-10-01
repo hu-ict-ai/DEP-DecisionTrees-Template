@@ -53,7 +53,7 @@ miniSet3 = [CRecord [1,1] "blue", CRecord [1,2] "green", CRecord [2,1] "green", 
 -- Als we een splitsing maken in onze boom, willen we de Gini impurity zo laag mogelijk krijgen.
 
 -- Bij het bepalen van de Gini impurity kijken we alleen naar de labels van de data.
--- TODO: schrijf de functie getLabels die een lijst van alle labels in een dataset teruggeeft.
+-- TODO: schrijf en becommentarieer de functie getLabels die een lijst van alle labels in een dataset teruggeeft.
 getLabels :: CDataset -> [String]
 getLabels = undefined
 
@@ -65,13 +65,13 @@ getLabels = undefined
 --          Voorbeeld: [1,1,2,2,2,1] => [[1,1],[2,2,2],[1]] 
 --     sort :: Ord a => [a] -> [a]
 --        ^ sorteert de lijst.
--- TODO: schrijf de functie countLabels die telt hoe vaak alle labels in de dataset voorkomen.
+-- TODO: schrijf en becommentarieer de functie countLabels die telt hoe vaak alle labels in de dataset voorkomen.
 countLabels :: CDataset -> [(String, Int)]
 countLabels = undefined
 
 -- Voor toekomstig gebruik willen we alvast een functie hebben die het meest voorkomende label
 -- van een dataset geeft. Bij gelijkspel mag je eender welk teruggeven.
--- TODO: schrijf de functie mostFrequentLabel op basis van countLabels.
+-- TODO: schrijf en becommentarieer de functie mostFrequentLabel op basis van countLabels.
 -- HINT: gebruik een functie uit de Prelude. We gebruiken mostFrequentLabel pas in de laatste sectie!
 mostFrequentLabel :: CDataset -> String
 mostFrequentLabel = undefined
@@ -86,7 +86,7 @@ fd x y = (/) (fromIntegral x) (fromIntegral y)
 --         ik, uit alle rijen, willekeurig een rij uit die klasse trek én
 --         ik, uit alle rijen, willekeurig een rij uit een andere klasse trek.
 -- Zie ook de stof van CM en de Canvas van DEP voor meer context.
--- TODO: schrijf de functie gini die de Gini impurity van één dataset bepaalt.
+-- TODO: schrijf en becommentarieer de functie gini die de Gini impurity van één dataset bepaalt.
 gini :: CDataset -> Float
 gini = undefined
 
@@ -96,7 +96,7 @@ gini = undefined
 --     1) een dataset met 3 rijen en een Gini impurity van 0.2;
 --     2) een dataset met 2 rijen en een Gini impurity van 0.1.
 -- Dan is de gecombineerde Gini impurity (0.2 * (3/5)) + (0.1 * (2/5)) = 0.16.
--- TODO: schrijf de functie giniAfterSplit die de gecombineerde Gini impurity van twee datasets bepaalt.
+-- TODO: schrijf en becommentarieer de functie giniAfterSplit die de gecombineerde Gini impurity van twee datasets bepaalt.
 giniAfterSplit :: CDataset -> CDataset -> Float
 giniAfterSplit = undefined
 
@@ -117,14 +117,14 @@ data CSplit = CSplit { feature :: Int
     deriving (Show, Eq, Ord)
 
 -- Allereerst willen we alle waarden van een bepaalde feature in een aparte lijst hebben.
--- TODO: schrijf de functie getFeature, die gegeven een feature (index in de lijst properties) en een dataset,
+-- TODO: schrijf en becommentarieer de functie getFeature, die gegeven een feature (index in de lijst properties) en een dataset,
 --       een lijst teruggeeft van alle waarden van die feature.
 getFeature :: Int -> CDataset -> [Float]
 getFeature = undefined
 
 -- Als we een lijst van waarden hebben, hoeven we alleen naar de unieke waarden te kijken.
 -- Tegelijkertijd is het wel zo makkelijk als de unieke waarden alvast zijn gesorteerd.
--- TODO: schrijf de functie getUniqueValuesSorted, die uit een lijst van Floats de unieke waarden gesorteerd teruggeeft.
+-- TODO: schrijf en becommentarieer de functie getUniqueValuesSorted, die uit een lijst van Floats de unieke waarden gesorteerd teruggeeft.
 -- HINT: gebruik de hulpfuncties uit de vorige sectie.
 getUniqueValuesSorted :: [Float] -> [Float]
 getUniqueValuesSorted = undefined
@@ -133,19 +133,19 @@ getUniqueValuesSorted = undefined
 -- In plaats daarvan splitsen we op het gemiddelde van alle twee naast elkaar gelegen waarden.
 -- Voorbeeld: getAverageValues [2.0, 3.0, 5.0, 9.0] ~> [2.5, 4.0, 7.0]
 -- Voor de traindata maakt dat geen verschil, maar voor het voorspellen van nieuwe waarden wel.
--- TODO: schrijf de functie getAverageValues, die de gemiddelden bepaalt van alle paren van twee waarden in een lijst.
+-- TODO: schrijf en becommentarieer de functie getAverageValues, die de gemiddelden bepaalt van alle paren van twee waarden in een lijst.
 getAverageValues :: [Float] -> [Float]
 getAverageValues = undefined
 
 -- Met deze functies kunnen we alle mogelijke CSplits bepalen voor één gegeven feature.
 -- Voorbeeld: een dataset met in feature 2 de waarden [9.0, 2.0, 5.0, 3.0] wordt
 --            [CSplit 2 2.5, CSplit 2 4.0, CSplit 7.0].
--- TODO: schrijf de functie getFeatureSplits, die alle mogelijke CSplits bepaalt voor een gegeven feature.
+-- TODO: schrijf en becommentarieer de functie getFeatureSplits, die alle mogelijke CSplits bepaalt voor een gegeven feature.
 getFeatureSplits :: Int -> CDataset -> [CSplit]
 getFeatureSplits = undefined
 
 -- Door getFeatureSplits toe te passen voor alle mogelijke features, kunnen we alle mogelijke CSplits bepalen.
--- TODO: schrijf de functie getAllFeatureSplits, die alle mogelijke CSplits van een dataset bepaalt.
+-- TODO: schrijf en becommentarieer de functie getAllFeatureSplits, die alle mogelijke CSplits van een dataset bepaalt.
 getAllFeatureSplits :: CDataset -> [CSplit]
 getAllFeatureSplits = undefined
 
@@ -160,12 +160,12 @@ getAllFeatureSplits = undefined
 -- kleiner-gelijk-aan is aan de splitswaarde, en False als deze groter is dan de splitswaarde.
 -- Voorbeelden: gegeven CSplit 1 3.0 en CRecord [4.0, 2.0, 9.0] "x", is het resultaat True.
 --              gegeven CSplit 1 1.0 en CRecord [4.0, 2.0, 9.0] "x", is het resultaat False.
--- TODO: schrijf de functie splitSingleRecord, die voor een enkel CRecord True of False teruggeeft.
+-- TODO: schrijf en becommentarieer de functie splitSingleRecord, die voor een enkel CRecord True of False teruggeeft.
 splitSingleRecord :: CSplit -> CRecord -> Bool
 splitSingleRecord = undefined
 
 -- Nu kunnen we de functie schrijven die één dataset opsplitst in twee, op basis van een CSplit object.
--- TODO: schrijf de functie splitOnFeature, die één dataset opsplitst in twee.
+-- TODO: schrijf en becommentarieer de functie splitOnFeature, die één dataset opsplitst in twee.
 -- HINT: gebruik een functie uit de Prelude. Onthoud dat CDataset = [CRecord]!
 splitOnFeature :: CDataset -> CSplit -> (CDataset, CDataset)
 splitOnFeature = undefined
@@ -174,7 +174,7 @@ splitOnFeature = undefined
 --     1) alle splitsingen genereren voor een CDataset, met behulp van Sectie 2;
 --     2) de datasets die resulteren bij elk van die splitsingen genereren.
 -- Wel is het van belang dat we onthouden welke splitsing bij welke twee datasets hoort.
--- TODO: schrijf de functie generateAllSplits, die voor een gegeven dataset alle mogelijke splitsingen "uitprobeert".
+-- TODO: schrijf en becommentarieer de functie generateAllSplits, die voor een gegeven dataset alle mogelijke splitsingen "uitprobeert".
 generateAllSplits :: CDataset -> [(CSplit, CDataset, CDataset)]
 generateAllSplits = undefined
 
@@ -182,7 +182,7 @@ generateAllSplits = undefined
 --     1) Genereer alle mogelijke splits;
 --     2) Bepaal welke van deze splitsingen het beste resultaat geeft - oftewel, de laagste Gini impurity.
 -- Hierbij willen we graag zowel de Gini impurity als de splitsing zelf onthouden.
--- TODO: schrijf de functie findBestSplit, die voor een dataset de best mogelijke splitsing vindt.
+-- TODO: schrijf en becommentarieer de functie findBestSplit, die voor een dataset de best mogelijke splitsing vindt.
 -- HINT: gebruik een functie uit de Prelude. Hoe werkt "kleiner dan" voor tupels?
 findBestSplit :: CDataset -> (Float, CSplit)
 findBestSplit = undefined
@@ -208,12 +208,12 @@ data DTree = Branch CSplit DTree DTree | Leaf String deriving (Show, Eq, Ord)
 --     ZO NIET,
 --         DAN geef ik een Branch terug met daarin de best mogelijke splitsing
 --         en de decision trees (sub-bomen) op basis van de twee datasets na die splitsing.
--- TODO: schrijf de functie buildDecisionTree.
+-- TODO: schrijf en becommentarieer de functie buildDecisionTree.
 buildDecisionTree :: CDataset -> DTree
 buildDecisionTree = undefined
 
 -- Tot slot, bij het voorspellen weten we alleen de eigenschappen ([Float]), niet het label.
--- TODO: schrijf de functie predict, die op basis van een boom en de gegeven eigenschappen het label voorspelt.
+-- TODO: schrijf en becommentarieer de functie predict, die op basis van een boom en de gegeven eigenschappen het label voorspelt.
 predict :: DTree -> [Float] -> String
 predict = undefined
 
