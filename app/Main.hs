@@ -32,25 +32,15 @@ incorrectString n r e = (colour Yellow $ "\nHet uitvoeren van " ++ n ++ " werkt 
 errorString :: String -> String
 errorString n = colour Red $ "De functie " ++ n ++ " werkt nog niet, je error was:"
 
-testFunc :: forall a. (Eq a, Show a) => a -> a -> String -> String -> IO ()
-testFunc given expected funcname operationname = do
-  res <- try (evaluate $ given) :: IO (Either SomeException a)
-  case res of
-    Left error -> do putStrLn $ errorString funcname
-                     putStrLn $ colour Grey $ displayException error
-                     putStrLn $ colour Reset ""
-    Right value -> if value == expected then putStrLn $ successString funcname
-                                        else putStrLn $ incorrectString operationname value expected
-
 data ThreeCase x a b c = ThreeLeft x a | ThreeMiddle x b | ThreeRight x c
 
-singleTest :: forall a. (Eq a, Show a) => (a, a, String, String) -> IO (ThreeCase String SomeException (a, a) a)
-singleTest (given, expected, funcname, operationname) = do
+singleTest :: forall a. (Eq a, Show a) => String -> (a, a, String) -> IO (ThreeCase String SomeException (a, a) a)
+singleTest funcname (given, expected, operationname) = do
   res <- try (evaluate $ given) :: IO (Either SomeException a)
   case res of
     Left error -> do return (ThreeLeft funcname error)
     Right value -> if value == expected then return (ThreeRight funcname value)
-                                        else return (ThreeMiddle operationname (value, expected))
+                                        else return (ThreeMiddle (funcname ++ " " ++ operationname) (value, expected))
 
 lowestCase :: IO (ThreeCase x a b c) -> IO (ThreeCase x a b c) -> IO (ThreeCase x a b c)
 lowestCase x y = do
@@ -63,9 +53,9 @@ lowestCase x y = do
     (_, y@(ThreeMiddle _ _)) -> return y
     otherwise                -> return first
 
-multiTest :: forall a. (Eq a, Show a) => [(a, a, String, String)] -> IO()
-multiTest l = do
-  result <- foldl1 lowestCase $ map singleTest l
+multiTest :: forall a. (Eq a, Show a) => String -> [(a, a, String)] -> IO()
+multiTest fn l = do
+  result <- foldl1 lowestCase $ map (singleTest fn) l
   case result of
     ThreeLeft s x -> do putStrLn $ errorString s
                         putStrLn $ colour Grey $ displayException x
@@ -78,25 +68,25 @@ roundToStr = printf "%0.*f"
 
 sec1 :: IO ()
 sec1 = do putStrLn "Tests aan het uitvoeren voor sectie 1:"
-          multiTest [((getLabels miniSet1), ["blue","green","pink","purple","gray"], "getLabels", "getLabels miniSet1"), 
-                     ((getLabels miniSet2), ["pink","pink","purple","blue","blue"], "getLabels", "getLabels miniSet2"),
-                     ((getLabels miniSet3), ["blue","green","green","green","orange","orange"], "getLabels", "getLabels miniSet3")]
-          multiTest [((sort $ countLabels miniSet1), [("blue",1),("gray",1),("green",1),("pink",1),("purple",1)], "countLabels", "countLabels miniSet1"),
-                     ((sort $ countLabels miniSet2), [("blue",2),("pink",2),("purple",1)], "countLabels", "countLabels miniSet2"),
-                     ((sort $ countLabels miniSet3), [("blue",1),("green",3),("orange",2)], "countLabels", "countLabels miniSet3"),
-                     ((sort $ countLabels irisFull), [("Iris-setosa",50),("Iris-versicolor",50),("Iris-virginica",50)], "countLabels", "countLabels irisFull")]
-          multiTest [((mostFrequentLabel miniSet3), "green", "mostFrequentLabel", "mostFrequentLabel miniSet3"),
-                     ((mostFrequentLabel exSet2), "green", "mostFrequentLabel", "mostFrequentLabel exSet2"),
-                     ((mostFrequentLabel exSet4), "green", "mostFrequentLabel", "mostFrequentLabel exSet4")]
-          multiTest [((roundToStr 3 $ gini miniSet1), "0.800", "gini", "gini miniSet1"),
-                     ((roundToStr 3 $ gini miniSet2), "0.640", "gini", "gini miniSet2"),
-                     ((roundToStr 3 $ gini exSet1), "0.500", "gini", "gini exSet1"),
-                     ((roundToStr 3 $ gini exSet4), "0.444", "gini", "gini exSet4"),
-                     ((roundToStr 3 $ gini irisFull), "0.667", "gini", "gini irisFull")]
-          multiTest [((roundToStr 3 $ giniAfterSplit miniSet1 miniSet2), "0.720", "giniAfterSplit", "giniAfterSplit miniSet1 miniSet2"),
-                     ((roundToStr 3 $ giniAfterSplit exSet1 exSet3), "0.500", "giniAfterSplit", "giniAfterSplit exSet1 exSet3"),
-                     ((roundToStr 3 $ giniAfterSplit exSet1 exSet4), "0.472", "giniAfterSplit", "giniAfterSplit exSet1 exSet4"),
-                     ((roundToStr 3 $ giniAfterSplit exSet2 exSet4), "0.468", "giniAfterSplit", "giniAfterSplit exSet2 exSet4")]
+          multiTest "getLabels" [((getLabels miniSet1), ["blue","green","pink","purple","gray"], "miniSet1"), 
+                     ((getLabels miniSet2), ["pink","pink","purple","blue","blue"], "miniSet2"),
+                     ((getLabels miniSet3), ["blue","green","green","green","orange","orange"], "miniSet3")]
+          multiTest "countLabels" [((sort $ countLabels miniSet1), [("blue",1),("gray",1),("green",1),("pink",1),("purple",1)], "miniSet1"),
+                     ((sort $ countLabels miniSet2), [("blue",2),("pink",2),("purple",1)], "miniSet2"),
+                     ((sort $ countLabels miniSet3), [("blue",1),("green",3),("orange",2)], "miniSet3"),
+                     ((sort $ countLabels irisFull), [("Iris-setosa",50),("Iris-versicolor",50),("Iris-virginica",50)], "irisFull")]
+          multiTest "mostFrequentLabel" [((mostFrequentLabel miniSet3), "green", "miniSet3"),
+                     ((mostFrequentLabel exSet2), "green", "exSet2"),
+                     ((mostFrequentLabel exSet4), "green", "exSet4")]
+          multiTest "gini" [((roundToStr 3 $ gini miniSet1), "0.800", "miniSet1"),
+                     ((roundToStr 3 $ gini miniSet2), "0.640", "miniSet2"),
+                     ((roundToStr 3 $ gini exSet1), "0.500", "exSet1"),
+                     ((roundToStr 3 $ gini exSet4), "0.444", "exSet4"),
+                     ((roundToStr 3 $ gini irisFull), "0.667", "irisFull")]
+          multiTest "giniAfterSplit" [((roundToStr 3 $ giniAfterSplit miniSet1 miniSet2), "0.720", "miniSet1 miniSet2"),
+                     ((roundToStr 3 $ giniAfterSplit exSet1 exSet3), "0.500", "exSet1 exSet3"),
+                     ((roundToStr 3 $ giniAfterSplit exSet1 exSet4), "0.472", "exSet1 exSet4"),
+                     ((roundToStr 3 $ giniAfterSplit exSet2 exSet4), "0.468", "exSet2 exSet4")]
   
 ms1splits0 :: [CSplit]
 ms1splits0 = [CSplit {feature = 0, value = 1.5},CSplit {feature = 0, value = 2.5},CSplit {feature = 0, value = 3.5},CSplit {feature = 0, value = 4.5}]
@@ -112,20 +102,20 @@ ex1splits = [CSplit {feature = 0, value = 1.5},CSplit {feature = 0, value = 2.5}
 
 sec2 :: IO ()
 sec2 = do putStrLn "Tests aan het uitvoeren voor sectie 2:"
-          multiTest [((getFeature 1 miniSet1), [1.0,2.0,3.0,4.0,5.0], "getFeature", "getFeature 1 miniSet1"),
-                     ((getFeature 1 miniSet3), [1.0,2.0,1.0,2.0,1.0,2.0], "getFeature", "getFeature 1 miniSet3")]
-          multiTest [((getUniqueValuesSorted [1.0, 2.0, 3.0, 4.0]), [1.0, 2.0, 3.0, 4.0], "getUniqueValuesSorted", "getUniqueValuesSorted [1.0, 2.0, 3.0, 4.0]"),
-                     ((getUniqueValuesSorted [4.0, 3.0, 2.0, 1.0]), [1.0, 2.0, 3.0, 4.0], "getUniqueValuesSorted", "getUniqueValuesSorted [4.0, 3.0, 2.0, 1.0]"),
-                     ((getUniqueValuesSorted [1.0, 2.0, 1.0, 2.0]), [1.0, 2.0], "getUniqueValuesSorted", "getUniqueValuesSorted [1.0, 2.0, 1.0, 2.0]")]
-          multiTest [((getAverageValues [2.0, 3.0, 5.0, 9.0]), [2.5, 4.0, 7.0], "getAverageValues", "getAverageValues [2.0, 3.0, 5.0, 9.0]"),
-                     ((getAverageValues [1.0, 4.0, 10.0, 20.0]), [2.5, 7.0, 15.0], "getAverageValues", "getAverageValues [1.0, 4.0, 10.0, 20.0]"),
-                     ((getAverageValues [-1.0, 5.0, 2.0, 4.0]), [2.0, 3.5, 3.0], "getAverageValues", "getAverageValues [-1.0, 5.0, 2.0, 4.0]")]
-          multiTest [((getFeatureSplits 0 miniSet1), ms1splits0, "getFeatureSplits", "getFeatureSplits 0 miniSet1"),
-                     ((getFeatureSplits 1 miniSet3), [CSplit {feature = 1, value = 1.5}], "getFeatureSplit", "getFeatureSplits 1 miniSet3"),
-                     ((getFeatureSplits 0 exSet1), ex1splits0, "getFeatureSplits", "getFeatureSplits 0 exSet1")]
-          multiTest [((getAllFeatureSplits miniSet1), ms1splits, "getAllFeatureSplits", "getAllFeatureSplits miniSet1"),
-                     ((getAllFeatureSplits miniSet3), [CSplit {feature = 0, value = 1.5},CSplit {feature = 0, value = 2.5},CSplit {feature = 1, value = 1.5}], "getAllFeatureSplits", "getAllFeatureSplits miniSet3"),
-                     ((getAllFeatureSplits exSet1), ex1splits, "getAllFeatureSplits", "getAllFeatureSplits exSet1")]
+          multiTest "getFeature" [((getFeature 1 miniSet1), [1.0,2.0,3.0,4.0,5.0], "1 miniSet1"),
+                     ((getFeature 1 miniSet3), [1.0,2.0,1.0,2.0,1.0,2.0], "1 miniSet3")]
+          multiTest "getUniqueValuesSorted" [((getUniqueValuesSorted [1.0, 2.0, 3.0, 4.0]), [1.0, 2.0, 3.0, 4.0], "[1.0, 2.0, 3.0, 4.0]"),
+                     ((getUniqueValuesSorted [4.0, 3.0, 2.0, 1.0]), [1.0, 2.0, 3.0, 4.0], "[4.0, 3.0, 2.0, 1.0]"),
+                     ((getUniqueValuesSorted [1.0, 2.0, 1.0, 2.0]), [1.0, 2.0], "[1.0, 2.0, 1.0, 2.0]")]
+          multiTest "getAverageValues" [((getAverageValues [2.0, 3.0, 5.0, 9.0]), [2.5, 4.0, 7.0], "[2.0, 3.0, 5.0, 9.0]"),
+                     ((getAverageValues [1.0, 4.0, 10.0, 20.0]), [2.5, 7.0, 15.0], "[1.0, 4.0, 10.0, 20.0]"),
+                     ((getAverageValues [-1.0, 5.0, 2.0, 4.0]), [2.0, 3.5, 3.0], "[-1.0, 5.0, 2.0, 4.0]")]
+          multiTest "getFeatureSplits" [((getFeatureSplits 0 miniSet1), ms1splits0, "0 miniSet1"),
+                     ((getFeatureSplits 1 miniSet3), [CSplit {feature = 1, value = 1.5}], "1 miniSet3"),
+                     ((getFeatureSplits 0 exSet1), ex1splits0, "0 exSet1")]
+          multiTest "getAllFeatureSplits" [((getAllFeatureSplits miniSet1), ms1splits, "miniSet1"),
+                     ((getAllFeatureSplits miniSet3), [CSplit {feature = 0, value = 1.5},CSplit {feature = 0, value = 2.5},CSplit {feature = 1, value = 1.5}], "miniSet3"),
+                     ((getAllFeatureSplits exSet1), ex1splits, "exSet1")]
 
 ms1sOF12 :: (CDataset, CDataset)
 ms1sOF12 = ([CRecord {properties = [1.0,1.0], label = "blue"},CRecord {properties = [2.0,2.0], label = "green"}],[CRecord {properties = [3.0,3.0], label = "pink"},CRecord {properties = [4.0,4.0], label = "purple"},CRecord {properties = [5.0,5.0], label = "gray"}])
@@ -150,21 +140,19 @@ inTupleRound i (x, y) = (roundToStr i x, y)
 
 sec3 :: IO ()
 sec3 = do putStrLn "Tests aan het uitvoeren voor sectie 3:"
-          multiTest [((splitSingleRecord (CSplit 1 3.0) (CRecord [4.0, 2.0, 9.0] "x")), True, "splitSingleRecord", "splitSingleRecord (CSplit 1 3.0) (CRecord [4.0, 2.0, 9.0] \"x\")"),
-                     ((splitSingleRecord (CSplit 1 1.0) (CRecord [4.0, 2.0, 9.0] "x")), False, "splitSingleRecord", "splitSingleRecord (CSplit 1 1.0) (CRecord [4.0, 2.0, 9.0] \"x\")"),
-                     ((splitSingleRecord (CSplit 2 8.0) (CRecord [4.0, 2.0, 9.0] "x")), False, "splitSingleRecord", "splitSingleRecord (CSplit 2 8.0) (CRecord [4.0, 2.0, 9.0] \"x\")"),
-                     ((splitSingleRecord (CSplit 0 8.0) (CRecord [4.0, 2.0, 9.0] "x")), True, "splitSingleRecord", "splitSingleRecord (CSplit 0 8.0) (CRecord [4.0, 2.0, 9.0] \"x\")")]
-          multiTest [((splitOnFeature miniSet1 (CSplit 1 2.5)), ms1sOF12, "splitOnFeature", "splitOnFeature miniSet1 (CSplit 1 2.5)"),
-                     ((splitOnFeature miniSet3 (CSplit 0 1.5)), ms3sOF01, "splitOnFeature", "splitOnFeature miniSet3 (CSplit 0 1.5)"),
-                     ((splitOnFeature exSet1 (CSplit 0 3.5)), ex1sOF03, "splitOnFeature", "splitOnFeature exSet1 (CSplit 0 3.5)")]
-          multiTest [((generateAllSplits miniSet1), ms1gAS, "generateAllSplits", "generateAllSplits miniSet1"),
-                     ((generateAllSplits miniSet2), ms2gAS, "generateAllSplits", "generateAllSplits miniSet2"),
-                     ((generateAllSplits miniSet3), ms3gAS, "generateAllSplits", "generateAllSplits miniSet3")]
-          multiTest [((inTupleRound 3 $ findBestSplit miniSet3), ("0.250", CSplit {feature = 0, value = 2.5}), "findBestSplit", "findBestSplit miniSet3"),
-                     ((inTupleRound 3 $ findBestSplit exSet2), ("0.463", CSplit {feature = 1, value = 3.5}), "findBestSplit", "findBestSplit exSet2"),
-                     ((inTupleRound 3 $ findBestSplit irisFull), ("0.333", CSplit {feature = 2, value = 2.45}), "findBestSplit", "findBestSplit")]
-
-
+          multiTest "splitSingleRecord" [((splitSingleRecord (CSplit 1 3.0) (CRecord [4.0, 2.0, 9.0] "x")), True, "(CSplit 1 3.0) (CRecord [4.0, 2.0, 9.0] \"x\")"),
+                     ((splitSingleRecord (CSplit 1 1.0) (CRecord [4.0, 2.0, 9.0] "x")), False, "(CSplit 1 1.0) (CRecord [4.0, 2.0, 9.0] \"x\")"),
+                     ((splitSingleRecord (CSplit 2 8.0) (CRecord [4.0, 2.0, 9.0] "x")), False, "(CSplit 2 8.0) (CRecord [4.0, 2.0, 9.0] \"x\")"),
+                     ((splitSingleRecord (CSplit 0 8.0) (CRecord [4.0, 2.0, 9.0] "x")), True, "(CSplit 0 8.0) (CRecord [4.0, 2.0, 9.0] \"x\")")]
+          multiTest "splitOnFeature" [((splitOnFeature miniSet1 (CSplit 1 2.5)), ms1sOF12, "miniSet1 (CSplit 1 2.5)"),
+                     ((splitOnFeature miniSet3 (CSplit 0 1.5)), ms3sOF01, "miniSet3 (CSplit 0 1.5)"),
+                     ((splitOnFeature exSet1 (CSplit 0 3.5)), ex1sOF03, "exSet1 (CSplit 0 3.5)")]
+          multiTest "generateAllSplits" [((generateAllSplits miniSet1), ms1gAS, "miniSet1"),
+                     ((generateAllSplits miniSet2), ms2gAS, "miniSet2"),
+                     ((generateAllSplits miniSet3), ms3gAS, "miniSet3")]
+          multiTest "findBestSplit" [((inTupleRound 3 $ findBestSplit miniSet3), ("0.250", CSplit {feature = 0, value = 2.5}), "miniSet3"),
+                     ((inTupleRound 3 $ findBestSplit exSet2), ("0.463", CSplit {feature = 1, value = 3.5}), "exSet2"),
+                     ((inTupleRound 3 $ findBestSplit irisFull), ("0.333", CSplit {feature = 2, value = 2.45}), "irisFull")]
 
 compareCTrees :: Int -> DTree -> DTree -> Bool
 compareCTrees _ (Leaf x) (Leaf y) = x == y
@@ -195,15 +183,14 @@ sec4 = do putStrLn "Als je alle stappen tot dusver hebt gevolgd, is de kans heel
           putStrLn "waarop de boom gebaseerd is móét de precisie 100% (of 1.0) zijn."
           putStrLn ""
           putStrLn "Tests met miniSet3:"
-          multiTest [((compareCTrees 3 miniSet3TargetTree (buildDecisionTree miniSet3)), True, "~ test [1] voor miniSet3 ~", "~ test [1] voor miniSet3 ~")]
-          multiTest [((predictionAccuracy (buildDecisionTree miniSet3) miniSet3), 1.0, "~ test [2] voor miniSet3 ~", "~ test [2] voor miniSet3 ~")]
+          multiTest "~ test [1] voor miniSet3 ~" [((compareCTrees 3 miniSet3TargetTree (buildDecisionTree miniSet3)), True, "")]
+          multiTest "~ test [2] voor miniSet3 ~" [((predictionAccuracy (buildDecisionTree miniSet3) miniSet3), 1.0, "")]
           putStrLn "Tests met exSet4:"
-          multiTest [((compareCTrees 3 exSet4TargetTree (buildDecisionTree exSet4)), True, "~ test [1] voor exSet4 ~", "~ test [1] voor exSet4 ~")]
-          multiTest [((predictionAccuracy (buildDecisionTree exSet4) exSet4), 1.0, "~ test [2] voor exSet4 ~", "~ test [2] voor exSet4 ~")]
+          multiTest "~ test [1] voor exSet4 ~" [((compareCTrees 3 exSet4TargetTree (buildDecisionTree exSet4)), True, "")]
+          multiTest "~ test [2] voor exSet4 ~" [((predictionAccuracy (buildDecisionTree exSet4) exSet4), 1.0, "")]
           putStrLn "Tests met de Iris-dataset:"
-          multiTest [((compareCTrees 3 irisFullTargetTree (buildDecisionTree irisFull)), True, "~ test [1] voor de Iris-dataset ~", "~ test [1] voor de Iris-dataset ~")]
-          multiTest [((predictionAccuracy (buildDecisionTree irisFull) irisFull), 1.0, "~ test [2] voor de Iris-dataset ~", "~ test [2] voor de Iris-dataset ~")]
-
+          multiTest "~ test [1] voor de Iris-dataset ~" [((compareCTrees 3 irisFullTargetTree (buildDecisionTree irisFull)), True, "")]
+          multiTest "~ test [2] voor de Iris-dataset ~" [((predictionAccuracy (buildDecisionTree irisFull) irisFull), 1.0, "")]
 
 main :: IO ()
 main = do putStrLn "Wil je losse secties laten testen (1-4) of stoppen (q)?"
