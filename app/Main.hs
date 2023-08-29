@@ -84,6 +84,7 @@ sec1 = do putStrLn "Tests aan het uitvoeren voor sectie 1:"
                      ((roundToStr 3 $ gini exSet4), "0.444", "exSet4"),
                      ((roundToStr 3 $ gini irisFull), "0.667", "irisFull")]
           multiTest "giniAfterSplit" [((roundToStr 3 $ giniAfterSplit miniSet1 miniSet2), "0.720", "miniSet1 miniSet2"),
+                     ((roundToStr 3 $ giniAfterSplit miniSet1 miniSet3), "0.697", "miniSet1 miniSet3"),
                      ((roundToStr 3 $ giniAfterSplit exSet1 exSet3), "0.500", "exSet1 exSet3"),
                      ((roundToStr 3 $ giniAfterSplit exSet1 exSet4), "0.472", "exSet1 exSet4"),
                      ((roundToStr 3 $ giniAfterSplit exSet2 exSet4), "0.468", "exSet2 exSet4")]
